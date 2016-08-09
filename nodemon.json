@@ -1,0 +1,6 @@
+{
+  "verbose": true,
+  "ext": "md,rs",
+  "watch": "src",
+  "exec": "cargo build && pandoc -s -t revealjs src/*.md -o html/index.html --slide-level=2"
+}

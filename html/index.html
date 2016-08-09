@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section><section id="the-concurrent-state-of-rust" class="titleslide slide level1"><h1>The Concurrent State of Rust</h1></section><section id="a-little-about-me" class="slide level2">
+<h1>A Little About Me</h1>
+<p>Chris Griffing</p>
+<p>Full Stack Web Developer in Bellevue at Fresh Consulting</p>
+<h3 id="rust-novice-alert">Rust Novice Alert!!!</h3>
+<p>I have a small node.js api I am rewriting in various backend languages. So far, Rust and Go. Elixir(/Phoenix) and Swift are next on my list.</p>
+<aside class="notes">
+<ul>
+<li>Mostly Javascript, but I still dip into PHP (especially lately... anybody hiring?)</li>
+<li>I want a language I can move onto from JS for highly performant backend tasks.</li>
+<li>Learning a language I can also use for systems programming is hugely ideal. That is part of the allure of JS, usage in multiple environments accross as many platforms as possible.</li>
+<li>And yes... server side Swift is a thing. I have not tried it, but at a meetup I met someone who convinced me to give it a shot.</li>
+</ul>
+</aside>
+</section><section id="tango" class="slide level2">
+<h1>Tango</h1>
+<p>Presentation made with Tango</p>
+<p><a href="https://github.com/pnkfelix/tango" class="uri">https://github.com/pnkfelix/tango</a></p>
+<p>Markdown to .rs file conversion and back. The Rust lives in the markdown in a code block, the markdown lives in the rust code as specially formatted comments.</p>
+<aside class="notes">
+<ul>
+<li><p>One issue. You have to be sure to run 'cargo build' when you want to switch from editing markdown files to rust files, or vice versa. This is to allow the build to synchronize the files.</p></li>
+<li><p>I used a watcher to run cargo build when any markdown or rust file changes. (nodemon just because of familiarity) cargo-watch would need to be custom compiled to watch the markdown files.</p></li>
+<li><p>Then pandoc to convert markdown to html. (Also in my watcher).</p></li>
+</ul>
+</aside>
+</section><section id="some-history" class="slide level2">
+<h1>Some History</h1>
+<p>&quot;When Rust first began, it baked channels directly into the language, taking a very opinionated stance on concurrency.&quot; -Aaron Turon</p>
+<p><a href="https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html" class="uri">https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html</a></p>
+<p>&quot;... we had M:N threading for a long time and went to great pains to remove it. ...&quot; -Patrick Walton</p>
+<p><a href="https://news.ycombinator.com/item?id=11369170" class="uri">https://news.ycombinator.com/item?id=11369170</a></p>
+<aside class="notes">
+<ul>
+<li>M:N threads === Green Threads === Coroutines === Goroutines</li>
+<li>Green threads are the default of Go and Haskell.</li>
+<li>In today’s Rust, concurrency is entirely a library affair; everything described in this post, including Send, is defined in the standard library, and could be defined in an external library instead.</li>
+<li>I don't specifically recognize Patrick Walton, but he appears to be a dev at Mozilla and his github profile has personal Rust repos dating back as far as 2012. Good enough for me.</li>
+</ul>
+</aside>
+</section></section>
+<section><section id="some-setup" class="titleslide slide level1"><h1>Some Setup</h1></section><section id="the-operation" class="slide level2">
+<h1>The Operation</h1>
+<p>Here is an arbitrary function we will be using to demonstrate how to use the various techniques.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> std::time::Duration;
+<span class="kw">use</span> std::thread::sleep;
+
+<span class="kw">pub</span> <span class="kw">fn</span> the_operation(handle: &amp;<span class="dt">str</span>, duration: <span class="dt">u64</span>) -&gt; &amp;<span class="dt">str</span> {
+    <span class="pp">println!</span>(<span class="st">&quot;Starting {}&quot;</span>, handle);
+    sleep(Duration::new(duration, <span class="dv">0</span>));
+    <span class="pp">println!</span>(<span class="st">&quot;Finishing {}&quot;</span>, handle);
+    <span class="kw">return</span> handle;
+}</code></pre></div>
+<aside class="notes">
+<p>It is not very complicated but it is something that we can execute with a varied duration to demonstrate concurrent operations resolving.</p>
+<p>Just imagine that this is making an http request.</p>
+</aside>
+</section><section id="a-quick-test" class="slide level2">
+<h1>A Quick Test</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_the_operation() {
+    <span class="kw">let</span> v1 = the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>);
+    <span class="kw">let</span> v2 = the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>);
+    <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, v1, v2);
+    <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+}</code></pre></div>
+</section></section>
+<section><section id="standard-library" class="titleslide slide level1"><h1>Standard Library</h1></section><section id="sendsync" class="slide level2">
+<h1>Send/Sync</h1>
+<p>These traits are the fundamental building blocks of pretty much everything else I will talk about today.</p>
+<p><a href="https://doc.rust-lang.org/nomicon/send-and-sync.html" class="uri">https://doc.rust-lang.org/nomicon/send-and-sync.html</a></p>
+<ul>
+<li><p>&quot;A type is Send if it is safe to send it to another thread.&quot;</p></li>
+<li><p>&quot;A type is Sync if it is safe to share between threads (&amp;T is Send).&quot;</p></li>
+<li><p>&quot;... unlike every other trait, if a type is composed entirely of Send or Sync types, then it is Send or Sync.&quot;</p></li>
+</ul>
+<aside class="notes">
+
+</aside>
+</section><section id="threads" class="slide level2">
+<h1>Threads</h1>
+<p>Kernel/OS level threads. Limited by the threading capabilities of the underlying hardware.</p>
+</section><section id="sharing-data---arc-and-mutex" class="slide level2">
+<h1>Sharing Data - Arc and Mutex</h1>
+<p>Arc (Atomic Reference Counter) allows us to share data between threads. However, the data is inherently immutable.</p>
+<p>A Mutex (Mutual Exclusion) allows us to lock the data as it is being written.</p>
+<p>We can wrap our value with a Mutex and then wrap that with an Arc. Mutexes become tricky if a thread panics after locking.</p>
+<aside class="notes">
+<ul>
+<li><p>The result of the lock method is a MutexGuard that cannot cross thread boundaries since it doesnt implement Send. The lock is therefore implicitly released when the result of the lock goes out of scope.</p></li>
+<li><p>To make sure the Arc/Mutex is not torn down before we are done with it, we have to add a timer to the function to allow the actions to complete. This means the timer is usually too long or not long enough.</p></li>
+<li><p>We can also use the method join. This blocks the parent function/thread until the child thread finishes. This means waiting on each thread explicitly.</p></li>
+</ul>
+</aside>
+</section><section id="joining-threads" class="slide level2">
+<h1>Joining Threads</h1>
+<aside class="notes">
+<p>In my opinions, this is the simplest way of handling threads in the standard library. Works especially well if your threads will have return values.</p>
+</aside>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> time::PreciseTime;
+<span class="kw">use</span> time::Duration;
+<span class="kw">use</span> std::thread;
+<span class="kw">use</span> slide_01_setup::the_operation;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_join() {
+    <span class="kw">let</span> start = PreciseTime::now();
+
+    <span class="kw">let</span> thread1 = thread::spawn(<span class="kw">move</span> || the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>));
+    <span class="kw">let</span> thread2 = thread::spawn(<span class="kw">move</span> || the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>));
+
+    <span class="kw">let</span> <span class="kw">mut</span> values = <span class="dt">Vec</span>::new();
+
+    values.push(thread1.join().unwrap());
+    values.push(thread2.join().unwrap());
+
+    <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, values[<span class="dv">0</span>], values[<span class="dv">1</span>]);
+
+    <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+
+    <span class="kw">let</span> end = PreciseTime::now();
+    <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}</code></pre></div>
+</section><section id="channels" class="slide level2">
+<h1>Channels</h1>
+<p>A unidirectional data flow from sender to receiver. Basically, message passing.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">// use time::PreciseTime;</span>
+<span class="kw">use</span> std::sync::mpsc::channel;
+<span class="co">// use std::thread;</span>
+<span class="co">// use slide_01_setup::the_operation;</span>
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_channels() {
+    <span class="kw">let</span> start = PreciseTime::now();
+
+    <span class="kw">let</span> (tx, rx) = channel();
+    <span class="kw">let</span> tx2 = tx.clone();
+
+    thread::spawn(<span class="kw">move</span> || {
+        tx.send(the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>)).unwrap();
+    });
+    thread::spawn(<span class="kw">move</span> || {
+        tx2.send(the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>)).unwrap();
+    });
+
+    <span class="kw">let</span> <span class="kw">mut</span> values = <span class="dt">Vec</span>::new();
+
+    values.push(rx.recv().unwrap());
+    values.push(rx.recv().unwrap());
+
+    <span class="co">// Also cheating by knowing the order of the responses ahead of time. Could have the function return a struct that has an index value for sorting the results.</span>
+    <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, values[<span class="dv">1</span>], values[<span class="dv">0</span>]);
+
+    <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+
+    <span class="kw">let</span> end = PreciseTime::now();
+    <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}</code></pre></div>
+</section></section>
+<section><section id="utility-libraries---quick-mentions" class="titleslide slide level1"><h1>Utility Libraries - Quick Mentions</h1></section><section id="crossbeam" class="slide level2">
+<h1>Crossbeam</h1>
+<p><a href="https://github.com/aturon/crossbeam" class="uri">https://github.com/aturon/crossbeam</a></p>
+<ul>
+<li><p>Non-blocking data structures - stacks, queues, dequeues, bags, sets and maps</p></li>
+<li><p>Scoped threads - Can share stack data among child threads</p></li>
+</ul>
+<aside class="notes">
+<p>The scope thread is really cool, but very similar standard threading.</p>
+<p>Do not disregard this library. I just wanted to cover some more diverse libraries.</p>
+</aside>
+</section><section id="some-others" class="slide level2">
+<h1>Some others</h1>
+<ul>
+<li>Simple_parallel - &quot;this is not recommended for general use&quot; - quoted form the docs</li>
+</ul>
+<p><a href="https://github.com/huonw/simple_parallel" class="uri">https://github.com/huonw/simple_parallel</a></p>
+<ul>
+<li>Syncbox - Queues and Thread Pools (Used to contain Futures but that was abstracted away)</li>
+</ul>
+<p><a href="https://github.com/carllerche/syncbox" class="uri">https://github.com/carllerche/syncbox</a></p>
+</section></section>
+<section><section id="coroutines" class="titleslide slide level1"><h1>Coroutines</h1></section><section id="libraries" class="slide level2">
+<h1>Libraries</h1>
+<ul>
+<li>mioco - <a href="https://github.com/dpc/mioco" class="uri">https://github.com/dpc/mioco</a></li>
+<li>coio-rs - <a href="https://github.com/zonyitoo/coio-rs" class="uri">https://github.com/zonyitoo/coio-rs</a></li>
+<li>coroutine-rs - <a href="https://github.com/rustcc/coroutine-rs" class="uri">https://github.com/rustcc/coroutine-rs</a></li>
+</ul>
+</section><section id="mioco" class="slide level2">
+<h1>Mioco</h1>
+<p>Built on top of Mio. Mio stands for Metal I/O. It just received $30k for api enhancements from the Mozilla Foundation.</p>
+<p><a href="http://hermanradtke.com/2015/07/12/my-basic-understanding-of-mio-and-async-io.html" class="uri">http://hermanradtke.com/2015/07/12/my-basic-understanding-of-mio-and-async-io.html</a></p>
+<aside class="notes">
+<ul>
+<li><p>Designed to have a similar api to Standard Library channels and threads for easy adoption.</p></li>
+<li><p>This code snippet probably looks a little familiar. It is very similar to the way we implemented a channel using the standard library.</p></li>
+</ul>
+</aside>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> time::PreciseTime;
+<span class="kw">use</span> time::Duration;
+<span class="kw">use</span> mioco;
+<span class="kw">use</span> mioco::Mioco;
+<span class="kw">use</span> mioco::sync::mpsc::channel;
+<span class="kw">use</span> slide_01_setup::the_operation;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_mioco_coroutines() {
+    Mioco::new()
+        .start(<span class="kw">move</span> || {
+            <span class="kw">let</span> start = PreciseTime::now();
+
+            <span class="kw">let</span> (tx, rx) = channel();
+            <span class="kw">let</span> tx2 = tx.clone();
+
+            mioco::spawn(<span class="kw">move</span> || {
+                tx.send(the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>)).unwrap();
+            });
+
+            mioco::spawn(<span class="kw">move</span> || {
+                tx2.send(the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>)).unwrap();
+            });
+
+            <span class="kw">let</span> <span class="kw">mut</span> values = <span class="dt">Vec</span>::new();
+
+            values.push(rx.recv().unwrap());
+            values.push(rx.recv().unwrap());
+
+            <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, values[<span class="dv">1</span>], values[<span class="dv">0</span>]);
+            <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+
+            <span class="kw">let</span> end = PreciseTime::now();
+            <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+
+        })
+        .unwrap();
+}</code></pre></div>
+</section></section>
+<section><section id="futures" class="titleslide slide level1"><h1>Futures</h1></section><section id="formerly-in-standard-library" class="slide level2">
+<h1>Formerly in Standard Library</h1>
+<p>Deprecated since 1.2.0 <a href="https://doc.rust-lang.org/1.2.0/std/sync/struct.Future.html" class="uri">https://doc.rust-lang.org/1.2.0/std/sync/struct.Future.html</a></p>
+<p>Maybe this helps explain why: <a href="https://www.reddit.com/r/rust/comments/2m64o5/stdsyncfuture_is_almost_useless_for_async/" class="uri">https://www.reddit.com/r/rust/comments/2m64o5/stdsyncfuture_is_almost_useless_for_async/</a></p>
+</section><section id="popular-libraries" class="slide level2">
+<h1>Popular Libraries</h1>
+<ul>
+<li>Eventual - <a href="https://github.com/carllerche/eventual" class="uri">https://github.com/carllerche/eventual</a></li>
+<li>futures-rs - <a href="https://github.com/alexcrichton/futures-rs" class="uri">https://github.com/alexcrichton/futures-rs</a></li>
+</ul>
+</section><section id="eventual" class="slide level2">
+<h1>Eventual</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> time::PreciseTime;
+<span class="kw">use</span> time::Duration;
+<span class="kw">use</span> eventual::*;
+<span class="kw">use</span> slide_01_setup::the_operation;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_futures() {
+    <span class="kw">let</span> start = PreciseTime::now();
+
+    <span class="kw">let</span> future1 = Future::spawn(|| the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>));
+
+    <span class="kw">let</span> future2 = Future::spawn(|| the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>));
+
+    <span class="kw">let</span> res = join((future1, future2))
+        .and_then(|(v1, v2)| <span class="cn">Ok</span>(<span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, v1, v2)))
+        .await()
+        .unwrap();
+
+    <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, res);
+
+    <span class="kw">let</span> end = PreciseTime::now();
+    <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}</code></pre></div>
+</section><section id="promises" class="slide level2">
+<h1>Promises</h1>
+<p>Similar to futures. Key Differences:</p>
+<ul>
+<li>Single-threaded</li>
+</ul>
+<p>It is pretty much like working with Node.js</p>
+<p><a href="https://github.com/dwrensha/gj" class="uri">https://github.com/dwrensha/gj</a></p>
+<aside class="notes">
+<p>For the most part, Eventual's Futures seem more useful.</p>
+<p>However, a single threaded event loop could be useful to isolate business logic from rendering logic if you were making something like a game engine.</p>
+</aside>
+</section><section id="an-example" class="slide level2">
+<h1>An Example</h1>
+<p>Warning: Not async, determined by ~5 second run time. Not sure why, but definitely user error.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">// use time::PreciseTime;</span>
+<span class="kw">use</span> gj::{EventLoop, Promise, ClosedEventPort};
+<span class="co">// use slide_01_setup::the_operation;</span>
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_promises() {
+    EventLoop::top_level(|wait_scope| -&gt; <span class="dt">Result</span>&lt;(), ()&gt; {
+        <span class="kw">let</span> start = PreciseTime::now();
+
+        <span class="kw">let</span> <span class="kw">mut</span> promises = <span class="dt">Vec</span>::new();
+
+        <span class="kw">let</span> promise1 = Promise::&lt;(), ()&gt;::ok(());
+        promises.push(promise1.then(|_| Promise::ok(the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>))));
+
+        <span class="kw">let</span> promise2 = Promise::&lt;(), ()&gt;::ok(());
+        promises.push(promise2.then(|_| Promise::ok(the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>))));
+
+        <span class="kw">let</span> values = Promise::all(promises.into_iter())
+            .wait(wait_scope, &amp;<span class="kw">mut</span> ClosedEventPort(()))
+            .unwrap();
+
+        <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, values[<span class="dv">0</span>], values[<span class="dv">1</span>]);
+        <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+
+        <span class="kw">let</span> end = PreciseTime::now();
+        <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+
+        <span class="cn">Ok</span>(())
+    })
+    .expect(<span class="st">&quot;top level&quot;</span>);
+}</code></pre></div>
+</section></section>
+<section><section id="asyncawait" class="titleslide slide level1"><h1>Async/Await</h1></section><section id="section" class="slide level2">
+<h1></h1>
+<p>Two simple macros built on top of Eventual's Futures. Saved for last because the code really does feel like the endgame syntax for async operations.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> time::PreciseTime;
+<span class="kw">use</span> time::Duration;
+<span class="kw">use</span> async_await::*;
+<span class="kw">use</span> slide_01_setup::the_operation;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_async_await() {
+    <span class="kw">let</span> start = PreciseTime::now();
+
+    <span class="kw">let</span> value1 = <span class="pp">async!</span>{the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>)};
+    <span class="kw">let</span> value2 = <span class="pp">async!</span>{the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>)};
+
+    <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, <span class="pp">await!</span>(value1), <span class="pp">await!</span>(value2));
+    <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+
+    <span class="kw">let</span> end = PreciseTime::now();
+    <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}</code></pre></div>
+</section></section>
+<section><section id="thanks." class="titleslide slide level1"><h1>Thanks.</h1></section></section>
+<section><section id="import-slide-modules-for-testing" class="titleslide slide level1"><h1>Import slide modules for testing</h1></section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>

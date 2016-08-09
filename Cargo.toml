@@ -1,0 +1,37 @@
+[package]
+name = "rust-concurrency-presentation"
+version = "0.1.0"
+authors = ["Chris Griffing <cmgriffing@gmail.com>"]
+
+# The `build = ...` line is how we hook in the tango-preprocessor.
+# It can be as simple as:
+# ```rust
+# extern crate tango;
+#
+# fn main() { tango::process_root().unwrap() }
+# ```
+
+build = "tango-build.rs"
+
+# Since the lib may be a tango file stored in `src/lib.md`, we need to
+# explicitly specify that this is a library project with a `[lib]`
+# section, which then requires an explicit name.
+
+[lib]
+name = "x_lib"
+
+# The preprocessor is the `tango` crate, so we need to add that
+# to the build-dependencies.
+
+[build-dependencies.tango]
+git = "https://github.com/pnkfelix/tango"
+
+[dependencies]
+mioco = "*"
+env_logger = "0.3.4"
+gj = "*"
+async-await = "0.1.2"
+time = "*"
+
+[dependencies.eventual]
+git = "https://github.com/carllerche/eventual"
