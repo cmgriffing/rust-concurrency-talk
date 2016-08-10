@@ -19,6 +19,7 @@ use time::PreciseTime;
 use time::Duration;
 use eventual::*;
 use slide_01_setup::the_operation;
+use test::Bencher;
 
 #[test]
 fn testing_futures() {
@@ -37,6 +38,13 @@ fn testing_futures() {
 
     let end = PreciseTime::now();
     assert!(start.to(end) < Duration::seconds(5));
+}
+
+#[bench]
+fn benchmark_futures(b: &mut Bencher) -> () {
+    b.iter(|| {
+        return testing_futures();
+    })
 }
 
 
@@ -92,4 +100,11 @@ fn testing_promises() {
         Ok(())
     })
     .expect("top level");
+}
+
+#[bench]
+fn benchmark_promises(b: &mut Bencher) -> () {
+    b.iter(|| {
+        return testing_promises();
+    })
 }

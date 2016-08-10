@@ -1,8 +1,11 @@
 # Thanks.
 
 # Import slide modules for testing
-
 ```rust
+#![feature(test)]
+#![cfg(test)]
+
+extern crate test;
 extern crate time;
 extern crate gj;
 extern crate eventual;

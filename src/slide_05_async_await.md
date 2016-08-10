@@ -9,6 +9,7 @@ use time::PreciseTime;
 use time::Duration;
 use async_await::*;
 use slide_01_setup::the_operation;
+use test::Bencher;
 
 #[test]
 fn testing_async_await() {
@@ -22,5 +23,12 @@ fn testing_async_await() {
 
     let end = PreciseTime::now();
     assert!(start.to(end) < Duration::seconds(5));
+}
+
+#[bench]
+fn benchmark_async_await(b: &mut Bencher) -> () {
+    b.iter(|| {
+        return testing_async_await();
+    })
 }
 ```

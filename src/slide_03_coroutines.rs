@@ -26,6 +26,7 @@ use mioco;
 use mioco::Mioco;
 use mioco::sync::mpsc::channel;
 use slide_01_setup::the_operation;
+use test::Bencher;
 
 #[test]
 fn testing_mioco_coroutines() {
@@ -57,4 +58,11 @@ fn testing_mioco_coroutines() {
 
         })
         .unwrap();
+}
+
+#[bench]
+fn benchmark_mioco_coroutines(b: &mut Bencher) -> () {
+    b.iter(|| {
+        return testing_mioco_coroutines();
+    })
 }

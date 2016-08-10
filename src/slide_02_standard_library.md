@@ -55,6 +55,7 @@ use time::PreciseTime;
 use time::Duration;
 use std::thread;
 use slide_01_setup::the_operation;
+use test::Bencher;
 
 #[test]
 fn testing_join() {
@@ -75,7 +76,15 @@ fn testing_join() {
     let end = PreciseTime::now();
     assert!(start.to(end) < Duration::seconds(5));
 }
+
+#[bench]
+fn benchmark_join(b: &mut Bencher) -> () {
+    b.iter(|| {
+        return testing_join();
+    })
+}
 ```
+
 
 ## Channels
 
@@ -114,7 +123,15 @@ fn testing_channels() {
     let end = PreciseTime::now();
     assert!(start.to(end) < Duration::seconds(5));
 }
+
+#[bench]
+fn benchmark_channels(b: &mut Bencher) -> () {
+    b.iter(|| {
+        return testing_channels();
+    })
+}
 ```
+
 
 # Utility Libraries - Quick Mentions
 
