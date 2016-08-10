@@ -112,9 +112,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">use</span> std::thread::sleep;
 
 <span class="kw">pub</span> <span class="kw">fn</span> the_operation(handle: &amp;<span class="dt">str</span>, duration: <span class="dt">u64</span>) -&gt; &amp;<span class="dt">str</span> {
-    <span class="pp">println!</span>(<span class="st">&quot;Starting {}&quot;</span>, handle);
-    sleep(Duration::new(duration, <span class="dv">0</span>));
-    <span class="pp">println!</span>(<span class="st">&quot;Finishing {}&quot;</span>, handle);
+    <span class="co">//println!(&quot;Starting {}&quot;, handle);</span>
+    sleep(Duration::from_millis(duration));
+    <span class="co">//println!(&quot;Finishing {}&quot;, handle);</span>
     <span class="kw">return</span> handle;
 }</code></pre></div>
 <aside class="notes">
@@ -123,12 +123,21 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </aside>
 </section><section id="a-quick-test" class="slide level2">
 <h1>A Quick Test</h1>
-<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> test::Bencher;
+
+<span class="at">#[</span>test<span class="at">]</span>
 <span class="kw">fn</span> testing_the_operation() {
     <span class="kw">let</span> v1 = the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>);
     <span class="kw">let</span> v2 = the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>);
     <span class="kw">let</span> result = <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, v1, v2);
     <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, result);
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_the_operation(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_the_operation();
+    })
 }</code></pre></div>
 </section></section>
 <section><section id="standard-library" class="titleslide slide level1"><h1>Standard Library</h1></section><section id="sendsync" class="slide level2">
@@ -167,6 +176,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">use</span> time::Duration;
 <span class="kw">use</span> std::thread;
 <span class="kw">use</span> slide_01_setup::the_operation;
+<span class="kw">use</span> test::Bencher;
 
 <span class="at">#[</span>test<span class="at">]</span>
 <span class="kw">fn</span> testing_join() {
@@ -186,6 +196,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
     <span class="kw">let</span> end = PreciseTime::now();
     <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_join(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_join();
+    })
 }</code></pre></div>
 </section><section id="channels" class="slide level2">
 <h1>Channels</h1>
@@ -221,6 +238,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
     <span class="kw">let</span> end = PreciseTime::now();
     <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_channels(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_channels();
+    })
 }</code></pre></div>
 </section></section>
 <section><section id="utility-libraries---quick-mentions" class="titleslide slide level1"><h1>Utility Libraries - Quick Mentions</h1></section><section id="crossbeam" class="slide level2">
@@ -268,6 +292,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">use</span> mioco::Mioco;
 <span class="kw">use</span> mioco::sync::mpsc::channel;
 <span class="kw">use</span> slide_01_setup::the_operation;
+<span class="kw">use</span> test::Bencher;
 
 <span class="at">#[</span>test<span class="at">]</span>
 <span class="kw">fn</span> testing_mioco_coroutines() {
@@ -299,6 +324,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
         })
         .unwrap();
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_mioco_coroutines(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_mioco_coroutines();
+    })
 }</code></pre></div>
 </section></section>
 <section><section id="futures" class="titleslide slide level1"><h1>Futures</h1></section><section id="formerly-in-standard-library" class="slide level2">
@@ -317,6 +349,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">use</span> time::Duration;
 <span class="kw">use</span> eventual::*;
 <span class="kw">use</span> slide_01_setup::the_operation;
+<span class="kw">use</span> test::Bencher;
 
 <span class="at">#[</span>test<span class="at">]</span>
 <span class="kw">fn</span> testing_futures() {
@@ -335,6 +368,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
     <span class="kw">let</span> end = PreciseTime::now();
     <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_futures(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_futures();
+    })
 }</code></pre></div>
 </section><section id="promises" class="slide level2">
 <h1>Promises</h1>
@@ -381,6 +421,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         <span class="cn">Ok</span>(())
     })
     .expect(<span class="st">&quot;top level&quot;</span>);
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_promises(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_promises();
+    })
 }</code></pre></div>
 </section></section>
 <section><section id="asyncawait" class="titleslide slide level1"><h1>Async/Await</h1></section><section id="section" class="slide level2">
@@ -390,6 +437,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">use</span> time::Duration;
 <span class="kw">use</span> async_await::*;
 <span class="kw">use</span> slide_01_setup::the_operation;
+<span class="kw">use</span> test::Bencher;
 
 <span class="at">#[</span>test<span class="at">]</span>
 <span class="kw">fn</span> testing_async_await() {
@@ -403,6 +451,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
     <span class="kw">let</span> end = PreciseTime::now();
     <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_async_await(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_async_await();
+    })
 }</code></pre></div>
 </section></section>
 <section><section id="thanks." class="titleslide slide level1"><h1>Thanks.</h1></section></section>
