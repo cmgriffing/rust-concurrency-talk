@@ -37,10 +37,10 @@ fn testing_the_operation() {
     assert_eq!("Hello World!", result);
 }
 
-#[bench]
-fn benchmark_the_operation(b: &mut Bencher) -> () {
-    b.iter(|| {
-        return testing_the_operation();
-    })
-}
+// #[bench]
+// fn benchmark_the_operation(b: &mut Bencher) -> () {
+//     b.iter(|| {
+//         return testing_the_operation();
+//     })
+// }
 ```

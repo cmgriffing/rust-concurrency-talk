@@ -8,6 +8,8 @@ extern crate test;
 extern crate time;
 extern crate gj;
 extern crate eventual;
+extern crate futures;
+extern crate futures_cpupool;
 
 #[macro_use]
 extern crate mioco;
@@ -19,3 +21,5 @@ pub mod slide_02_standard_library;
 pub mod slide_03_coroutines;
 pub mod slide_04_futures;
 pub mod slide_05_async_await;
+pub mod slide_06_futures;
+pub mod slide_07_async_await;

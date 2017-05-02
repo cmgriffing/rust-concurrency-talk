@@ -60,9 +60,9 @@ fn testing_mioco_coroutines() {
         .unwrap();
 }
 
-#[bench]
-fn benchmark_mioco_coroutines(b: &mut Bencher) -> () {
-    b.iter(|| {
-        return testing_mioco_coroutines();
-    })
-}
+// #[bench]
+// fn benchmark_mioco_coroutines(b: &mut Bencher) -> () {
+//     b.iter(|| {
+//         return testing_mioco_coroutines();
+//     })
+// }

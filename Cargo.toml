@@ -30,8 +30,10 @@ git = "https://github.com/pnkfelix/tango"
 mioco = "*"
 env_logger = "0.3.4"
 gj = "*"
-async-await = "0.1.2"
+async-await = "0.2.1"
 time = "*"
+futures = "0.1.1"
+futures-cpupool = { git = "https://github.com/alexcrichton/futures-rs" }
 
 [dependencies.eventual]
 git = "https://github.com/carllerche/eventual"

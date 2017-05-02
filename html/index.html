@@ -351,7 +351,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">use</span> slide_01_setup::the_operation;
 <span class="kw">use</span> test::Bencher;
 
-<span class="at">#[</span>test<span class="at">]</span>
+<span class="co">// #[test]</span>
 <span class="kw">fn</span> testing_futures() {
     <span class="kw">let</span> start = PreciseTime::now();
 
@@ -371,7 +371,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 }
 
 <span class="at">#[</span>bench<span class="at">]</span>
-<span class="kw">fn</span> benchmark_futures(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+<span class="kw">fn</span> benchmark_eventual(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
     b.iter(|| {
         <span class="kw">return</span> testing_futures();
     })
@@ -457,6 +457,50 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">fn</span> benchmark_async_await(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
     b.iter(|| {
         <span class="kw">return</span> testing_async_await();
+    })
+}</code></pre></div>
+</section></section>
+<section><section id="futures.rs" class="titleslide slide level1"><h1>Futures.rs</h1></section><section id="futures.rs-1" class="slide level2">
+<h1>Futures.rs</h1>
+<p>A zero-allocation futures implementation</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> futures::oneshot;
+<span class="kw">use</span> std::thread;
+<span class="kw">use</span> futures::Future;
+<span class="kw">use</span> time::PreciseTime;
+<span class="kw">use</span> time::Duration;
+<span class="kw">use</span> slide_01_setup::the_operation;
+<span class="kw">use</span> test::Bencher;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> testing_futures_rs() {
+
+    <span class="kw">let</span> start = PreciseTime::now();
+
+    <span class="kw">let</span> (tx, rx) = oneshot();
+    <span class="kw">let</span> (tx2, rx2) = oneshot();
+
+    thread::spawn(<span class="kw">move</span> || {
+        tx.complete(the_operation(<span class="st">&quot;Hello&quot;</span>, <span class="dv">3</span>));
+    });
+
+    thread::spawn(<span class="kw">move</span> || {
+        tx2.complete(the_operation(<span class="st">&quot;World&quot;</span>, <span class="dv">2</span>));
+    });
+
+    <span class="kw">let</span> res = rx.join(rx2).map(|(v1, v2)| {
+        <span class="pp">format!</span>(<span class="st">&quot;{} {}!&quot;</span>, v1, v2)
+    }).wait().unwrap();
+
+    <span class="pp">assert_eq!</span>(<span class="st">&quot;Hello World!&quot;</span>, res);
+
+    <span class="kw">let</span> end = PreciseTime::now();
+    <span class="pp">assert!</span>(start.to(end) &lt; Duration::seconds(<span class="dv">5</span>));
+}
+
+<span class="at">#[</span>bench<span class="at">]</span>
+<span class="kw">fn</span> benchmark_futures_rs(b: &amp;<span class="kw">mut</span> Bencher) -&gt; () {
+    b.iter(|| {
+        <span class="kw">return</span> testing_futures_rs();
     })
 }</code></pre></div>
 </section></section>

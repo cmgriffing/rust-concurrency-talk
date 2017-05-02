@@ -22,7 +22,8 @@ fn testing_async_await() {
     assert_eq!("Hello World!", result);
 
     let end = PreciseTime::now();
-    assert!(start.to(end) < Duration::seconds(5));
+    println!("duration:  {}", start.to(end));
+    assert!(start.to(end) < Duration::milliseconds(5));
 }
 
 #[bench]
